@@ -2,7 +2,7 @@ version: '2.1'
 
 services:
   anthias-server:
-    image: screenly/anthias-server:latest-raspberrypi4-64
+    image: screenly/anthias-server:latest
     restart: always
     environment:
       - HOME=/data
@@ -15,7 +15,7 @@ services:
       io.balena.features.supervisor-api: '1'
 
   anthias-viewer:
-    image: screenly/anthias-viewer:latest-raspberrypi4-64
+    image: screenly/anthias-viewer:latest
     restart: always
     privileged: true
     shm_size: 512mb
@@ -33,7 +33,7 @@ services:
       io.balena.features.supervisor-api: '1'
 
   anthias-websocket:
-    image: screenly/anthias-websocket:latest-raspberrypi4-64
+    image: screenly/anthias-websocket:latest
     restart: always
     depends_on:
       - anthias-server
@@ -44,7 +44,7 @@ services:
       - balena-data:/data
 
   anthias-celery:
-    image: screenly/anthias-celery:latest-raspberrypi4-64
+    image: screenly/anthias-celery:latest
     restart: always
     depends_on:
       - anthias-server
@@ -59,13 +59,13 @@ services:
       io.balena.features.supervisor-api: '1'
 
   redis:
-    image: screenly/anthias-redis:latest-raspberrypi4-64
+    image: redis:7-alpine
     restart: always
     volumes:
-      - redis-data:/var/lib/redis
+      - redis-data:/data
 
   anthias-nginx:
-    image: screenly/anthias-nginx:latest-raspberrypi4-64
+    image: screenly/anthias-nginx:latest
     restart: always
     ports:
       - "80:80"
