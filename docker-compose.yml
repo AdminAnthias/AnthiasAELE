@@ -1,21 +1,40 @@
 version: '2.1'
 
 services:
+  anthias-wifi-connect:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.wifi-connect
+    depends_on:
+      - anthias-viewer
+    environment:
+      PORTAL_LISTENING_PORT: 8000
+      CHECK_CONN_FREQ: 10
+      PORTAL_SSID: 'Anthias WiFi Connect'
+      DBUS_SYSTEM_BUS_ADDRESS: 'unix:path=/run/dbus/system_bus_socket'
+    network_mode: host
+    privileged: true
+
   anthias-server:
-    image: screenly/anthias-server:latest
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.server
     restart: always
     environment:
       - HOME=/data
       - LISTEN=0.0.0.0
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - TZ=Europe/Berlin
     volumes:
       - balena-data:/data
     labels:
       io.balena.features.supervisor-api: '1'
 
   anthias-viewer:
-    image: screenly/anthias-viewer:latest
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.viewer
     restart: always
     privileged: true
     shm_size: 512mb
@@ -33,7 +52,9 @@ services:
       io.balena.features.supervisor-api: '1'
 
   anthias-websocket:
-    image: screenly/anthias-websocket:latest
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.websocket
     restart: always
     depends_on:
       - anthias-server
@@ -44,7 +65,9 @@ services:
       - balena-data:/data
 
   anthias-celery:
-    image: screenly/anthias-celery:latest
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.celery
     restart: always
     depends_on:
       - anthias-server
@@ -59,13 +82,17 @@ services:
       io.balena.features.supervisor-api: '1'
 
   redis:
-    image: redis:7-alpine
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.redis
     restart: always
     volumes:
-      - redis-data:/data
+      - redis-data:/var/lib/redis
 
   anthias-nginx:
-    image: screenly/anthias-nginx:latest
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.nginx
     restart: always
     ports:
       - "80:80"
